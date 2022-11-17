@@ -19,10 +19,20 @@ void CheckCuda(cudaError_t result, char const* const func,
   }
 }
 
+__device__ bool HitSphere(const Vec3& center, float radius, const Ray& r) {
+  Vec3 oc = r.Origin() - center;
+  float a = Dot(r.Direction(), r.Direction());
+  float b = 2.0 * Dot(oc, r.Direction());
+  float c = Dot(oc, oc) - radius * radius;
+  float discriminant = b * b - 4 * a * c;
+  return (discriminant > 0.0f);
+}
+
 __device__ Vec3 Color(const Ray& r) {
+  if (HitSphere(Vec3(0, 0, -1), 0.5, r)) return Vec3(1, 0, 0);
   Vec3 unit_direction = UnitVector(r.Direction());
-  float t = 0.5f * (unit_direction.Y() + 1.0f);
-  return (1.0f - t) * Vec3(1.0, 1.0, 1.0) + t * Vec3(0.5, 0.7, 1.0);
+  float t = 0.5 * (unit_direction.Y() + 1.0);
+  return (1.0 - t) * Vec3(1.0, 1.0, 1.0) + t * Vec3(0.5, 0.7, 1.0);
 }
 
 __global__ void Render(Vec3* fb, int max_x, int max_y, Vec3 lower_left_corner,
