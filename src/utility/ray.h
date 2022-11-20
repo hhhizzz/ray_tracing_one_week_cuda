@@ -3,17 +3,17 @@
 
 class Ray {
  public:
-  __device__ Ray() {}
+  __device__ Ray() = default;
   __device__ Ray(const Vec3& a, const Vec3& b) {
-    A = a;
-    B = b;
+    this->a = a;
+    this->b = b;
   }
-  __device__ Vec3 Origin() const { return A; }
-  __device__ Vec3 Direction() const { return B; }
-  __device__ Vec3 PointAtParameter(float t) const { return A + t * B; }
+  __device__ Vec3 Origin() const { return a; }
+  __device__ Vec3 Direction() const { return b; }
+  __device__ Vec3 PointAtParameter(float t) const { return a + t * b; }
 
-  Vec3 A;
-  Vec3 B;
+  Vec3 a;
+  Vec3 b;
 };
 
-#pragma once
+#pragma endregion

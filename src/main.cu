@@ -6,7 +6,7 @@
 #include "utility/vec3.h"
 
 // limited version of CheckCudaErrors from helper_cuda.h in CUDA examples
-#define CheckCudaErrors(val) CheckCuda((val), #val, __FILE__, __LINE__)
+#define CHECK_CUDA_ERRORS(val) CheckCuda((val), #val, __FILE__, __LINE__)
 
 void CheckCuda(cudaError_t result, char const* const func,
                const char* const file, int const line) {
@@ -61,7 +61,7 @@ int main() {
 
   // allocate FB
   Vec3* fb;
-  CheckCudaErrors(cudaMallocManaged((void**)&fb, fb_size));
+  CHECK_CUDA_ERRORS(cudaMallocManaged((void**)&fb, fb_size));
 
   clock_t start, stop;
   start = clock();
@@ -71,8 +71,8 @@ int main() {
   Render<<<blocks, threads>>>(fb, nx, ny, Vec3(-2.0, -1.0, -1.0),
                               Vec3(4.0, 0.0, 0.0), Vec3(0.0, 2.0, 0.0),
                               Vec3(0.0, 0.0, 0.0));
-  CheckCudaErrors(cudaGetLastError());
-  CheckCudaErrors(cudaDeviceSynchronize());
+  CHECK_CUDA_ERRORS(cudaGetLastError());
+  CHECK_CUDA_ERRORS(cudaDeviceSynchronize());
   stop = clock();
   double timer_seconds = ((double)(stop - start)) / CLOCKS_PER_SEC;
   std::cerr << "took " << timer_seconds << " seconds.\n";
@@ -92,5 +92,5 @@ int main() {
     }
   }
 
-  CheckCudaErrors(cudaFree(fb));
+  CHECK_CUDA_ERRORS(cudaFree(fb));
 }
