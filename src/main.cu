@@ -35,8 +35,8 @@ __device__ double HitSphere(const Vec3& center, float radius, const Ray& r) {
 __device__ Color RayColor(const Ray& r) {
   auto t = HitSphere({0, 0, -1}, 0.5, r);
   if (t > 0.0) {
-    Vec3 N = UnitVector(r.At(t) - Vec3(0, 0, -1));
-    return 0.5 * Color(N.X() + 1, N.Y() + 1, N.Z() + 1);
+    Vec3 normal = UnitVector(r.At(t) - Vec3(0, 0, -1));
+    return 0.5 * Color(normal.X() + 1, normal.Y() + 1, normal.Z() + 1);
   }
   Vec3 unit_direction = UnitVector(r.Direction());
   t = 0.5 * (unit_direction.Y() + 1.0);
