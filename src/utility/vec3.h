@@ -21,7 +21,7 @@ class Vec3 {
 
   __host__ __device__ inline const Vec3& operator+() const { return *this; }
   __host__ __device__ inline Vec3 operator-() const {
-    return Vec3(-e[0], -e[1], -e[2]);
+    return {-e[0], -e[1], -e[2]};
   }
   __host__ __device__ inline float operator[](int i) const { return e[i]; }
   __host__ __device__ inline float& operator[](int i) { return e[i]; };
@@ -30,8 +30,8 @@ class Vec3 {
   __host__ __device__ inline Vec3& operator-=(const Vec3& v2);
   __host__ __device__ inline Vec3& operator*=(const Vec3& v2);
   __host__ __device__ inline Vec3& operator/=(const Vec3& v2);
-  __host__ __device__ inline Vec3& operator*=(const float t);
-  __host__ __device__ inline Vec3& operator/=(const float t);
+  __host__ __device__ inline Vec3& operator*=(float t);
+  __host__ __device__ inline Vec3& operator/=(float t);
 
   __host__ __device__ inline float Length() const {
     return sqrt(e[0] * e[0] + e[1] * e[1] + e[2] * e[2]);
@@ -144,5 +144,7 @@ __host__ __device__ inline Vec3& Vec3::operator/=(const float t) {
 }
 
 __host__ __device__ inline Vec3 UnitVector(Vec3 v) { return v / v.Length(); }
+
+using Color = Vec3;    // RGB color
 
 #pragma endregion

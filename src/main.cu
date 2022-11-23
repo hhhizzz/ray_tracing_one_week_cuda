@@ -19,32 +19,44 @@ void CheckCuda(cudaError_t result, char const* const func,
   }
 }
 
-__device__ bool HitSphere(const Vec3& center, float radius, const Ray& r) {
+__device__ double HitSphere(const Vec3& center, float radius, const Ray& r) {
   Vec3 oc = r.Origin() - center;
   float a = Dot(r.Direction(), r.Direction());
-  float b = 2.0 * Dot(oc, r.Direction());
+  float b = 2.0f * Dot(oc, r.Direction());
   float c = Dot(oc, oc) - radius * radius;
   float discriminant = b * b - 4 * a * c;
-  return (discriminant > 0.0f);
+  if (discriminant < 0) {
+    return -1.0;
+  } else {
+    return (-b - std::sqrt(discriminant)) / (2.0 * a);
+  }
 }
 
-__device__ Vec3 Color(const Ray& r) {
-  if (HitSphere(Vec3(0, 0, -1), 0.5, r)) return Vec3(1, 0, 0);
+__device__ Color RayColor(const Ray& r) {
+  auto t = HitSphere({0, 0, -1}, 0.5, r);
+  if (t > 0.0) {
+    Vec3 N = UnitVector(r.At(t) - Vec3(0, 0, -1));
+    return 0.5 * Color(N.X() + 1, N.Y() + 1, N.Z() + 1);
+  }
   Vec3 unit_direction = UnitVector(r.Direction());
-  float t = 0.5 * (unit_direction.Y() + 1.0);
-  return (1.0 - t) * Vec3(1.0, 1.0, 1.0) + t * Vec3(0.5, 0.7, 1.0);
+  t = 0.5 * (unit_direction.Y() + 1.0);
+  return (1.0f - t) * Vec3(1.0, 1.0, 1.0) + t * Vec3(0.5, 0.7, 1.0);
 }
 
 __global__ void Render(Vec3* fb, int max_x, int max_y, Vec3 lower_left_corner,
                        Vec3 horizontal, Vec3 vertical, Vec3 origin) {
-  int i = threadIdx.x + blockIdx.x * blockDim.x;
-  int j = threadIdx.y + blockIdx.y * blockDim.y;
-  if ((i >= max_x) || (j >= max_y)) return;
-  int pixel_index = j * max_x + i;
+  unsigned int i = threadIdx.x + blockIdx.x * blockDim.x;
+  unsigned int j = threadIdx.y + blockIdx.y * blockDim.y;
+  if ((i >= max_x) || (j >= max_y)) {
+    return;
+  }
+
   float u = float(i) / float(max_x);
   float v = float(j) / float(max_y);
   Ray r(origin, lower_left_corner + u * horizontal + v * vertical);
-  fb[pixel_index] = Color(r);
+
+  unsigned int pixel_index = j * max_x + i;
+  fb[pixel_index] = RayColor(r);
 }
 
 int main() {
@@ -73,6 +85,7 @@ int main() {
                               Vec3(0.0, 0.0, 0.0));
   CHECK_CUDA_ERRORS(cudaGetLastError());
   CHECK_CUDA_ERRORS(cudaDeviceSynchronize());
+
   stop = clock();
   double timer_seconds = ((double)(stop - start)) / CLOCKS_PER_SEC;
   std::cerr << "took " << timer_seconds << " seconds.\n";
