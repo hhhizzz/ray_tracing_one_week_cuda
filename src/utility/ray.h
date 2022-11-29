@@ -10,7 +10,7 @@ class Ray {
   }
   __device__ Vec3 Origin() const { return a; }
   __device__ Vec3 Direction() const { return b; }
-  __device__ Vec3 At(float t) const { return a + t * b; }
+  __device__ Vec3 At(double t) const { return a + t * b; }
 
   Vec3 a;
   Vec3 b;
