@@ -2,6 +2,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "object/hittable.h"
+#include "object/sphere.h"
 #include "utility/ray.h"
 #include "utility/vec3.h"
 
@@ -60,15 +62,16 @@ __global__ void Render(Vec3* fb, int max_x, int max_y, Vec3 lower_left_corner,
 }
 
 int main() {
-  int nx = 1200;
-  int ny = 600;
+  int image_width = 1200;
+  int image_height = 600;
   int tx = 8;
   int ty = 8;
 
-  std::cerr << "Rendering a " << nx << "x" << ny << " image ";
+  std::cerr << "Rendering a " << image_width << "x" << image_height
+            << " image ";
   std::cerr << "in " << tx << "x" << ty << " blocks.\n";
 
-  int num_pixels = nx * ny;
+  int num_pixels = image_width * image_height;
   size_t fb_size = num_pixels * sizeof(Vec3);
 
   // allocate FB
@@ -78,11 +81,11 @@ int main() {
   clock_t start, stop;
   start = clock();
   // Render our buffer
-  dim3 blocks(nx / tx + 1, ny / ty + 1);
+  dim3 blocks(image_width / tx + 1, image_height / ty + 1);
   dim3 threads(tx, ty);
-  Render<<<blocks, threads>>>(fb, nx, ny, Vec3(-2.0, -1.0, -1.0),
-                              Vec3(4.0, 0.0, 0.0), Vec3(0.0, 2.0, 0.0),
-                              Vec3(0.0, 0.0, 0.0));
+  Render<<<blocks, threads>>>(fb, image_width, image_height,
+                              Vec3(-2.0, -1.0, -1.0), Vec3(4.0, 0.0, 0.0),
+                              Vec3(0.0, 2.0, 0.0), Vec3(0.0, 0.0, 0.0));
   CHECK_CUDA_ERRORS(cudaGetLastError());
   CHECK_CUDA_ERRORS(cudaDeviceSynchronize());
 
@@ -94,10 +97,10 @@ int main() {
   // Output
   std::ofstream ofs(scene_name + ".ppm");
   // Output FB as Image
-  ofs << "P3\n" << nx << " " << ny << "\n255\n";
-  for (int j = ny - 1; j >= 0; j--) {
-    for (int i = 0; i < nx; i++) {
-      size_t pixel_index = j * nx + i;
+  ofs << "P3\n" << image_width << " " << image_height << "\n255\n";
+  for (int j = image_height - 1; j >= 0; j--) {
+    for (int i = 0; i < image_width; i++) {
+      size_t pixel_index = j * image_width + i;
       int ir = int(255.99 * fb[pixel_index].R());
       int ig = int(255.99 * fb[pixel_index].G());
       int ib = int(255.99 * fb[pixel_index].B());

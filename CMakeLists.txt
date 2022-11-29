@@ -13,7 +13,7 @@ include_directories(src)
 
 add_executable(
         ray_tracing
-        src/main.cu src/utility/ray.h)
+        src/main.cu)
 
 target_compile_features(ray_tracing PUBLIC cxx_std_17)
 

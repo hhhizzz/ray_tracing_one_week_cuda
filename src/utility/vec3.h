@@ -146,5 +146,6 @@ __host__ __device__ inline Vec3& Vec3::operator/=(const double t) {
 __host__ __device__ inline Vec3 UnitVector(Vec3 v) { return v / v.Length(); }
 
 using Color = Vec3;  // RGB color
+using Point3 = Vec3;
 
 #pragma endregion
