@@ -19,12 +19,12 @@ void CheckCuda(cudaError_t result, char const* const func,
   }
 }
 
-__device__ double HitSphere(const Vec3& center, float radius, const Ray& r) {
+__device__ double HitSphere(const Vec3& center, double radius, const Ray& r) {
   Vec3 oc = r.Origin() - center;
-  float a = Dot(r.Direction(), r.Direction());
-  float b = 2.0f * Dot(oc, r.Direction());
-  float c = Dot(oc, oc) - radius * radius;
-  float discriminant = b * b - 4 * a * c;
+  double a = Dot(r.Direction(), r.Direction());
+  double b = 2.0f * Dot(oc, r.Direction());
+  double c = Dot(oc, oc) - radius * radius;
+  double discriminant = b * b - 4 * a * c;
   if (discriminant < 0) {
     return -1.0;
   } else {
@@ -51,8 +51,8 @@ __global__ void Render(Vec3* fb, int max_x, int max_y, Vec3 lower_left_corner,
     return;
   }
 
-  float u = float(i) / float(max_x);
-  float v = float(j) / float(max_y);
+  double u = double(i) / double(max_x);
+  double v = double(j) / double(max_y);
   Ray r(origin, lower_left_corner + u * horizontal + v * vertical);
 
   unsigned int pixel_index = j * max_x + i;
